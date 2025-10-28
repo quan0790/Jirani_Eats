@@ -38,15 +38,15 @@ const Index = () => {
 
               <div className="flex flex-wrap gap-6 pt-6">
                 <div>
-                  <div className="text-3xl font-bold text-primary">10K+</div>
+                  <div className="text-3xl font-bold text-primary">150+</div>
                   <div className="text-sm text-muted-foreground">Meals Shared</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-secondary">2.5K+</div>
+                  <div className="text-3xl font-bold text-secondary">1K+</div>
                   <div className="text-sm text-muted-foreground">Active Users</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-accent">500+</div>
+                  <div className="text-3xl font-bold text-accent">50+</div>
                   <div className="text-sm text-muted-foreground">Communities</div>
                 </div>
               </div>

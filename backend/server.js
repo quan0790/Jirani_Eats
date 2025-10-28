@@ -12,7 +12,13 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+app.options("*", cors());
 app.use(express.json());
 
 // Routes
@@ -26,4 +32,13 @@ app.use(errorHandler);
 
 // Server listener
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
+  .on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.log(`⚠️ Port ${PORT} in use, trying ${PORT + 1}...`);
+      app.listen(PORT + 1, () => console.log(`🚀 Server running on port ${PORT + 1}`));
+    } else {
+      console.error(err);
+    }
+  });

@@ -14,8 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// ✅ Import API helpers properly
-import { registerUser, loginUser } from "@/api"; 
+// ✅ Import API functions
+import { registerUser, loginUser } from "@/api";
 
 const Auth = () => {
   const [loginData, setLoginData] = useState({ email: "", password: "" });
@@ -30,10 +30,13 @@ const Auth = () => {
   // ✅ Handle login
   const handleLogin = async () => {
     try {
-      const res = await loginUser(loginData);
-      localStorage.setItem("token", res.data.token);
-      navigate("/"); // redirect after login
+      console.log("🔵 Sending login request:", loginData);
+      const { data } = await loginUser(loginData); // ✅ fixed
+      console.log("✅ Login response:", data);
+      localStorage.setItem("token", data.token);
+      navigate("/");
     } catch (err) {
+      console.error("❌ Login failed:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Login failed");
     }
   };
@@ -41,10 +44,13 @@ const Auth = () => {
   // ✅ Handle signup
   const handleSignup = async () => {
     try {
-      const res = await registerUser(signupData);
-      localStorage.setItem("token", res.data.token);
-      navigate("/"); // redirect after signup
+      console.log("🔵 Sending signup request:", signupData);
+      const { data } = await registerUser(signupData); // ✅ fixed
+      console.log("✅ Signup response:", data);
+      localStorage.setItem("token", data.token);
+      navigate("/");
     } catch (err) {
+      console.error("❌ Signup failed:", err.response?.data || err.message);
       setError(err.response?.data?.message || "Signup failed");
     }
   };
@@ -52,7 +58,6 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-
       <main className="container mx-auto px-4 py-16">
         <div className="max-w-md mx-auto">
           <Tabs defaultValue="login" className="w-full">
@@ -71,30 +76,24 @@ const Auth = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={loginData.email}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, email: e.target.value })
-                      }
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={loginData.password}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, password: e.target.value })
-                      }
-                      placeholder="••••••••"
-                    />
-                  </div>
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={loginData.email}
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, email: e.target.value })
+                    }
+                    placeholder="your@email.com"
+                  />
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    value={loginData.password}
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, password: e.target.value })
+                    }
+                    placeholder="••••••••"
+                  />
                   {error && (
                     <p className="text-red-500 text-sm text-center">{error}</p>
                   )}
@@ -115,51 +114,33 @@ const Auth = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={signupData.name}
-                      onChange={(e) =>
-                        setSignupData({
-                          ...signupData,
-                          name: e.target.value,
-                        })
-                      }
-                      placeholder="John Doe"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      value={signupData.email}
-                      onChange={(e) =>
-                        setSignupData({
-                          ...signupData,
-                          email: e.target.value,
-                        })
-                      }
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      value={signupData.password}
-                      onChange={(e) =>
-                        setSignupData({
-                          ...signupData,
-                          password: e.target.value,
-                        })
-                      }
-                      placeholder="••••••••"
-                    />
-                  </div>
+                  <Label>Full Name</Label>
+                  <Input
+                    type="text"
+                    value={signupData.name}
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, name: e.target.value })
+                    }
+                    placeholder="John Doe"
+                  />
+                  <Label>Email</Label>
+                  <Input
+                    type="email"
+                    value={signupData.email}
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, email: e.target.value })
+                    }
+                    placeholder="your@email.com"
+                  />
+                  <Label>Password</Label>
+                  <Input
+                    type="password"
+                    value={signupData.password}
+                    onChange={(e) =>
+                      setSignupData({ ...signupData, password: e.target.value })
+                    }
+                    placeholder="••••••••"
+                  />
                   {error && (
                     <p className="text-red-500 text-sm text-center">{error}</p>
                   )}
@@ -172,11 +153,9 @@ const Auth = () => {
           </Tabs>
         </div>
       </main>
-
       <Footer />
     </div>
   );
 };
 
 export default Auth;
-// ✅ Use the imported API functions for login and signup
