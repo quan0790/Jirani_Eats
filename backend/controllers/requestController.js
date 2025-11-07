@@ -1,60 +1,90 @@
 import FoodRequest from "../models/FoodRequest.js";
 
-// ✅ Create new food request
+// ✅ Create a new food request
 export const createFoodRequest = async (req, res) => {
   try {
-    const { foodType, message } = req.body;
+    const { foodId, pickupLocation, message } = req.body;
 
+    // Validate required fields
+    if (!foodId || !pickupLocation) {
+      return res
+        .status(400)
+        .json({ message: "Food ID and pickup location are required" });
+    }
+
+    // Create a new request
     const request = await FoodRequest.create({
-      foodType,
+      foodId,
+      pickupLocation,
       message,
-      requestedBy: req.user._id,
+      requestedBy: req.user._id, // from protect middleware
     });
 
     res.status(201).json(request);
-  } catch (err) {
-    console.error("❌ Error creating food request:", err);
-    res.status(500).json({ message: "Server error while creating request" });
+  } catch (error) {
+    console.error("❌ Error creating food request:", error.message);
+    res
+      .status(500)
+      .json({ message: "Server error while creating food request" });
   }
 };
 
-// ✅ Get all requests (for admins or dashboard)
+// ✅ Get all requests made by the logged-in user
 export const getFoodRequests = async (req, res) => {
   try {
-    const requests = await FoodRequest.find()
+    const requests = await FoodRequest.find({ requestedBy: req.user._id })
       .populate("requestedBy", "name email")
-      .sort({ createdAt: -1 });
+      .populate("foodId", "title description expiryDate");
 
     res.json(requests);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching requests" });
+  } catch (error) {
+    console.error("❌ Error fetching food requests:", error.message);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching food requests" });
   }
 };
 
-// ✅ Get single request
+// ✅ Get a single request by ID
 export const getSingleRequest = async (req, res) => {
   try {
-    const request = await FoodRequest.findById(req.params.id).populate("requestedBy", "name email");
-    if (!request) return res.status(404).json({ message: "Request not found" });
+    const request = await FoodRequest.findById(req.params.id)
+      .populate("requestedBy", "name email")
+      .populate("foodId", "title description expiryDate");
+
+    if (!request)
+      return res.status(404).json({ message: "Request not found" });
+
     res.json(request);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching request" });
+  } catch (error) {
+    console.error("❌ Error fetching single request:", error.message);
+    res
+      .status(500)
+      .json({ message: "Server error while fetching single request" });
   }
 };
 
-// ✅ Delete request
+// ✅ Delete a food request
 export const deleteFoodRequest = async (req, res) => {
   try {
     const request = await FoodRequest.findById(req.params.id);
-    if (!request) return res.status(404).json({ message: "Request not found" });
 
-    if (request.requestedBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Not authorized to delete this request" });
+    if (!request)
+      return res.status(404).json({ message: "Request not found" });
+
+    // Ensure only the user who created the request can delete it
+    if (request.requestedBy.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this request" });
     }
 
     await request.deleteOne();
     res.json({ message: "Request deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting request" });
+  } catch (error) {
+    console.error("❌ Error deleting request:", error.message);
+    res
+      .status(500)
+      .json({ message: "Server error while deleting food request" });
   }
 };

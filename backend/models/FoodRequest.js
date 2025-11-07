@@ -2,12 +2,23 @@ import mongoose from "mongoose";
 
 const foodRequestSchema = new mongoose.Schema(
   {
-    foodType: {
+    foodId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Food",
+      required: true,
+    },
+    pickupLocation: {
       type: String,
       required: true,
     },
     message: {
       type: String,
+      default: "",
+    },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "completed"],
+      default: "pending",
     },
     requestedBy: {
       type: mongoose.Schema.Types.ObjectId,

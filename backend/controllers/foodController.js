@@ -1,101 +1,56 @@
-import FoodItem from "../models/FoodItem.js";
+// controllers/foodController.js
+import Food from "../models/FoodItem.js";
 
-// ✅ Create a new food item
+// ✅ Create new food item
 export const createFoodItem = async (req, res) => {
-  const { title, description, quantity, unit, pickupLocation } = req.body;
-
   try {
-    if (!req.user) {
-      console.error("❌ No user found in request");
-      return res.status(401).json({ message: "Not authorized" });
+    const { title, description, quantity, unit, expiryDate, pickupLocation } = req.body;
+
+    if (!title || !quantity) {
+      return res.status(400).json({ message: "Title and quantity are required" });
     }
 
-    const item = await FoodItem.create({
+    const newFood = await Food.create({
       title,
       description,
       quantity,
       unit,
+      expiryDate,
       pickupLocation,
-      postedBy: req.user._id,
+      postedBy: req.user._id, // from auth middleware
     });
 
-    res.status(201).json(item);
-  } catch (err) {
-    console.error("❌ Error creating food item:", err.message);
-    res.status(500).json({ message: err.message });
+    res.status(201).json(newFood);
+  } catch (error) {
+    console.error("❌ Error creating food item:", error);
+    res.status(500).json({ message: "Server error creating food item" });
   }
 };
 
-// ✅ Get all available food items
+// ✅ Get all available foods
 export const getFoodItems = async (req, res) => {
-  const search = req.query.search || "";
-  const query = { isAvailable: true, title: { $regex: search, $options: "i" } };
-
   try {
-    const items = await FoodItem.find(query)
+    const foods = await Food.find()
       .populate("postedBy", "name email")
-      .sort({ createdAt: -1 });
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+      .sort({ createdAt: -1 }); // latest first
+
+    res.json(foods);
+  } catch (error) {
+    console.error("❌ Error fetching foods:", error);
+    res.status(500).json({ message: "Server error fetching food items" });
   }
 };
 
-// ✅ Get a single food item by ID
-export const getFoodItemById = async (req, res) => {
+// ✅ Get a single food item by ID (for RequestFood page)
+export const getFoodById = async (req, res) => {
   try {
-    const item = await FoodItem.findById(req.params.id).populate(
-      "postedBy",
-      "name email"
-    );
-    if (!item) return res.status(404).json({ message: "Food item not found" });
-    res.json(item);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// ✅ Update a food item
-export const updateFoodItem = async (req, res) => {
-  try {
-    const item = await FoodItem.findById(req.params.id);
-    if (!item) return res.status(404).json({ message: "Food item not found" });
-
-    if (
-      item.postedBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to update this item" });
+    const food = await Food.findById(req.params.id).populate("postedBy", "name email");
+    if (!food) {
+      return res.status(404).json({ message: "Food item not found" });
     }
-
-    Object.assign(item, req.body);
-    const updated = await item.save();
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
-
-// ✅ Delete a food item
-export const deleteFoodItem = async (req, res) => {
-  try {
-    const item = await FoodItem.findById(req.params.id);
-    if (!item) return res.status(404).json({ message: "Food item not found" });
-
-    if (
-      item.postedBy.toString() !== req.user._id.toString() &&
-      req.user.role !== "admin"
-    ) {
-      return res
-        .status(403)
-        .json({ message: "Not authorized to delete this item" });
-    }
-
-    await item.deleteOne();
-    res.json({ message: "Food item deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.json(food);
+  } catch (error) {
+    console.error("❌ Error fetching food by ID:", error);
+    res.status(500).json({ message: "Server error fetching food item" });
   }
 };

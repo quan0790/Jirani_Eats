@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,32 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const RequestFood = () => {
+  const [food, setFood] = useState(null);
   const [formData, setFormData] = useState({
-    foodType: "",
+    pickupLocation: "",
     message: "",
   });
 
   const navigate = useNavigate();
+  const location = useLocation();
   const token = localStorage.getItem("token");
+  const foodId = new URLSearchParams(location.search).get("foodId");
+
+  useEffect(() => {
+    if (!foodId) return;
+    const fetchFood = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/foods/${foodId}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to fetch food item");
+        setFood(data);
+      } catch (error) {
+        console.error("❌ Error fetching food:", error);
+        toast.error("Could not load food details.");
+      }
+    };
+    fetchFood();
+  }, [foodId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,17 +55,15 @@ const RequestFood = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          foodId,
+          ...formData,
+        }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to send request");
 
-      if (!res.ok) {
-        console.error("❌ Error submitting request:", data);
-        throw new Error(data.message || "Failed to send request");
-      }
-
-      console.log("✅ Request submitted:", data);
       toast.success("Food request submitted successfully!");
       navigate("/dashboard");
     } catch (err) {
@@ -64,21 +81,37 @@ const RequestFood = () => {
           Request Food
         </h1>
 
+        {food && (
+          <div className="mb-6 p-4 border rounded-lg bg-green-50">
+            <h2 className="text-xl font-semibold text-green-700">{food.title}</h2>
+            <p className="text-sm text-gray-700 mt-1">{food.description}</p>
+            <p className="text-sm mt-1">
+              <strong>Location:</strong> {food.address || "Not provided"}
+            </p>
+            <p className="text-sm">
+              <strong>Expires:</strong>{" "}
+              {food.expiryDate
+                ? new Date(food.expiryDate).toLocaleDateString()
+                : "N/A"}
+            </p>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            name="foodType"
-            placeholder="Type of food (e.g., Fruits, Vegetables, Meals)"
-            value={formData.foodType}
+            name="pickupLocation"
+            placeholder="Enter your pickup location"
+            value={formData.pickupLocation}
             onChange={handleChange}
             required
           />
           <Textarea
             name="message"
-            placeholder="Add a short note (e.g., number of people, preferred pickup time)"
+            placeholder="Additional details (e.g. preferred pickup time, contact info)"
             value={formData.message}
             onChange={handleChange}
           />
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white">
             Submit Request
           </Button>
         </form>

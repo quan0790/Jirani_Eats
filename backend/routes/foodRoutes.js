@@ -1,22 +1,16 @@
 import express from "express";
-import {
-  createFoodItem,
-  getFoodItems,
-  getFoodItemById,
-  updateFoodItem,
-  deleteFoodItem,
-} from "../controllers/foodController.js";
+import { createFoodItem, getFoodItems, getFoodById } from "../controllers/foodController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Public routes
-router.get("/", getFoodItems);
-router.get("/:id", getFoodItemById);
-
-// Protected routes
+// POST - Create new food item (protected)
 router.post("/", protect, createFoodItem);
-router.put("/:id", protect, updateFoodItem);
-router.delete("/:id", protect, deleteFoodItem);
+
+// GET - Get all available foods
+router.get("/", getFoodItems);
+
+// GET - Get single food by ID
+router.get("/:id", getFoodById);
 
 export default router;

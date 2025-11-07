@@ -1,140 +1,123 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { UserPlus, Upload, Bell, HandHeart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import React from "react";
+import { motion } from "framer-motion";
+import { Users, Gift, Handshake, MapPin } from "lucide-react";
 
 const HowItWorks = () => {
+  const stepsDonor = [
+    {
+      id: 1,
+      title: "Sign Up",
+      desc: "Create your free account and set up your profile — it takes less than a minute to get started.",
+      icon: <Users className="w-8 h-8 text-green-600" />,
+    },
+    {
+      id: 2,
+      title: "List Your Food",
+      desc: "Add details about the food you want to share — type, quantity, and expiry date. Upload photos to help receivers.",
+      icon: <Gift className="w-8 h-8 text-green-600" />,
+    },
+    {
+      id: 3,
+      title: "Get Matched",
+      desc: "Receive instant notifications when someone requests your food. Review their profile and approve the request.",
+      icon: <Handshake className="w-8 h-8 text-green-600" />,
+    },
+    {
+      id: 4,
+      title: "Coordinate Pickup",
+      desc: "Arrange a convenient time and place for collection. Make a real impact in your community!",
+      icon: <MapPin className="w-8 h-8 text-green-600" />,
+    },
+  ];
+
+  const stepsReceiver = [
+    {
+      id: 1,
+      title: "Create Account",
+      desc: "Sign up for free and complete your profile to start exploring available donations.",
+      icon: <Users className="w-8 h-8 text-blue-600" />,
+    },
+    {
+      id: 2,
+      title: "Browse Donations",
+      desc: "Search for available food in your neighborhood. Filter by category, distance, or pickup time.",
+      icon: <Gift className="w-8 h-8 text-blue-600" />,
+    },
+    {
+      id: 3,
+      title: "Request Food",
+      desc: "Submit a request for the food items you need. The donor will review and confirm availability.",
+      icon: <Handshake className="w-8 h-8 text-blue-600" />,
+    },
+    {
+      id: 4,
+      title: "Pick Up & Enjoy",
+      desc: "Once approved, coordinate with the donor to pick up your meal. Enjoy your food — and the power of community sharing!",
+      icon: <MapPin className="w-8 h-8 text-blue-600" />,
+    },
+  ];
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* ✅ Navbar */}
-      <Navbar />
+    <div className="min-h-screen bg-gray-50 py-16 px-6 md:px-20">
+      <div className="text-center mb-16">
+        <motion.h1
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="text-4xl font-bold text-gray-800"
+        >
+          How It Works
+        </motion.h1>
+        <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
+          Sharing and receiving food has never been easier. Follow these simple steps to start making a difference today.
+        </p>
+      </div>
 
-      <main className="flex-grow container mx-auto px-4 py-16">
-        <div className="max-w-5xl mx-auto space-y-16">
-          {/* INTRO SECTION */}
-          <section className="text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold max-w-3xl mx-auto">
-              Sharing and receiving food has never been easier.
-            </h1>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              Follow these simple steps to start making a difference today.
-            </p>
-          </section>
-
-          {/* FOR DONORS */}
-          <section className="space-y-12">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2">For Donors</h2>
-              <p className="text-muted-foreground">
-                Have surplus food? Share it with your community in 4 easy steps.
-              </p>
-            </div>
-
-            {[
-              {
-                step: 1,
-                icon: <UserPlus className="h-5 w-5 text-primary" />,
-                title: "Sign Up",
-                text: "Create your free account and set up your profile. It takes less than a minute to get started.",
-              },
-              {
-                step: 2,
-                icon: <Upload className="h-5 w-5 text-primary" />,
-                title: "List Your Food",
-                text: "Add details about the food you want to share – type, quantity, and expiry date. Add photos to help receivers.",
-              },
-              {
-                step: 3,
-                icon: <Bell className="h-5 w-5 text-primary" />,
-                title: "Get Matched",
-                text: "Receive notifications when someone requests your food. Review and approve the request.",
-              },
-              {
-                step: 4,
-                icon: <HandHeart className="h-5 w-5 text-primary" />,
-                title: "Coordinate Pickup",
-                text: "Arrange a convenient time and place for the receiver to collect the food. Make an impact!",
-              },
-            ].map(({ step, icon, title, text }) => (
-              <div
-                key={step}
-                className="flex gap-4 p-6 rounded-xl bg-card border border-border hover:bg-muted/40 transition"
-              >
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-primary">{step}</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {icon}
-                    <h3 className="text-xl font-semibold">{title}</h3>
-                  </div>
-                  <p className="text-muted-foreground">{text}</p>
-                </div>
-              </div>
-            ))}
-          </section>
-
-          {/* FOR RECEIVERS */}
-          <section className="space-y-12">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold mb-2">For Receivers</h2>
-              <p className="text-muted-foreground">
-                Need food assistance? Access nutritious meals in your community.
-              </p>
-            </div>
-
-            {[
-              {
-                step: 1,
-                title: "Create Account",
-                text: "Sign up for free and complete your profile to start browsing available food donations.",
-              },
-              {
-                step: 2,
-                title: "Browse Donations",
-                text: "Search for available food in your area. Filter by type, distance, and pickup time.",
-              },
-              {
-                step: 3,
-                title: "Request Food",
-                text: "Submit a request for food items you need. Donors will review and respond to your request.",
-              },
-              {
-                step: 4,
-                title: "Pick Up & Enjoy",
-                text: "Once approved, coordinate with the donor to pick up your food. Enjoy your meal!",
-              },
-            ].map(({ step, title, text }) => (
-              <div
-                key={step}
-                className="flex gap-4 p-6 rounded-xl bg-card border border-border hover:bg-muted/40 transition"
-              >
-                <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-secondary">{step}</span>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold">{title}</h3>
-                  <p className="text-muted-foreground">{text}</p>
-                </div>
-              </div>
-            ))}
-          </section>
-
-          {/* CALL TO ACTION */}
-          <section className="text-center bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 md:text-2xl text-lg max-w-3xl mx-auto">
-            <p className="mb-6">
-              Join thousands of community members making a difference through food sharing.
-            </p>
-            <Button variant="secondary" size="lg" asChild>
-              <Link to="/auth">Join JiraniEats Today</Link>
-            </Button>
-          </section>
+      {/* For Donors */}
+      <section className="mb-20">
+        <h2 className="text-2xl font-semibold text-green-700 text-center mb-8">
+          For Donors
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {stepsDonor.map((step, index) => (
+            <motion.div
+              key={step.id}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.2 }}
+              className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-2xl transition"
+            >
+              <div className="flex justify-center mb-4">{step.icon}</div>
+              <h3 className="text-lg font-semibold text-gray-800">{step.title}</h3>
+              <p className="text-gray-600 mt-2 text-sm">{step.desc}</p>
+              <span className="text-gray-400 text-xs mt-3 block">Step {step.id}</span>
+            </motion.div>
+          ))}
         </div>
-      </main>
+      </section>
 
-      {/* ✅ Footer */}
-      <Footer />
+      {/* For Receivers */}
+      <section>
+        <h2 className="text-2xl font-semibold text-blue-700 text-center mb-8">
+          For Receivers
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {stepsReceiver.map((step, index) => (
+            <motion.div
+              key={step.id}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.2 }}
+              className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-2xl transition"
+            >
+              <div className="flex justify-center mb-4">{step.icon}</div>
+              <h3 className="text-lg font-semibold text-gray-800">{step.title}</h3>
+              <p className="text-gray-600 mt-2 text-sm">{step.desc}</p>
+              <span className="text-gray-400 text-xs mt-3 block">Step {step.id}</span>
+            </motion.div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 };

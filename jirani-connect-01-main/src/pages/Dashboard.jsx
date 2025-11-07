@@ -9,52 +9,86 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Package, Inbox, TrendingUp, User, LogOut } from "lucide-react";
+import { Plus, Package, Inbox, TrendingUp, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getFoods } from "../api"; // ✅ API import
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 const Dashboard = () => {
-  const { user, logout } = useAuth(); // ✅ Access user + logout from context
-  const [donations, setDonations] = useState([]);
+  const { user, logout } = useAuth();
+  const [foods, setFoods] = useState([]);
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
+  // ✅ Fetch user's donations and requests
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
+    const fetchDashboardData = async () => {
+      if (!user || !token) return;
 
       try {
         setLoading(true);
-        const foodRes = await getFoods();
-        const allFoods = foodRes.data;
 
-        // ✅ Filter data based on logged-in user
-        const myDonations = allFoods.filter((item) => item.donorId === user.id);
-        const myRequests = allFoods.filter((item) => item.requesterId === user.id);
+        // Fetch all food items
+        const foodRes = await fetch("http://localhost:5000/api/foods");
+        const foodData = await foodRes.json();
 
-        setDonations(myDonations);
+        // Fetch user requests
+        const requestRes = await fetch("http://localhost:5000/api/requests", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const requestData = await requestRes.json();
+
+        // Filter user's data
+        const myFoods = foodData.filter(
+          (item) => item.postedBy === user.id || item.postedBy === user._id
+        );
+        const myRequests = requestData.filter(
+          (req) => req.requestedBy === user.id || req.requestedBy === user._id
+        );
+
+        setFoods(myFoods);
         setRequests(myRequests);
-      } catch (error) {
-        console.error("Error fetching food data:", error);
+      } catch (err) {
+        console.error("❌ Error fetching dashboard data:", err);
+        toast.error("Error loading dashboard data.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [user]);
+    fetchDashboardData();
+  }, [user, token]);
 
-  const totalImpact = donations.length + requests.length;
+  const totalImpact = foods.length + requests.length;
 
+  // ✅ Handle logout
   const handleLogout = () => {
     logout();
     navigate("/auth");
   };
 
+  // ✅ Cancel pending request
+  const handleCancelRequest = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this request?")) return;
+    try {
+      const res = await fetch(`http://localhost:5000/api/requests/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) throw new Error("Failed to cancel request");
+      setRequests(requests.filter((r) => r._id !== id));
+      toast.success("Request cancelled successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error cancelling request.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       <Navbar />
 
       <main className="container mx-auto px-4 py-16">
@@ -66,14 +100,15 @@ const Dashboard = () => {
                 {user ? `Welcome, ${user.name}` : "Dashboard"}
               </h1>
               <p className="text-muted-foreground mt-2">
-                Manage your food donations and requests
+                Manage your food donations and requests easily
               </p>
             </div>
 
-            {/* Account + Logout Buttons */}
             {user && (
               <div className="flex gap-3 mt-4 md:mt-0">
-                <Button variant="outline" onClick={() => navigate("/account")}>My Account</Button>
+                <Button variant="outline" onClick={() => navigate("/account")}>
+                  My Account
+                </Button>
                 <Button
                   variant="destructive"
                   onClick={handleLogout}
@@ -85,23 +120,28 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Actions */}
-          {user && (
-            <div className="flex gap-3">
-              <Button asChild variant="default">
-                <Link to="/donate-food">
-                  <Plus className="mr-2 h-4 w-4" /> Donate Food
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/request-food">
-                  <Inbox className="mr-2 h-4 w-4" /> Request Food
-                </Link>
-              </Button>
-            </div>
-          )}
+          {/* Quick Actions */}
+          <div className="flex flex-wrap gap-3">
+            <Button asChild variant="default">
+              <Link to="/add-food">
+                <Plus className="mr-2 h-4 w-4" /> List Your Food
+              </Link>
+            </Button>
 
-          {/* Cards Section */}
+            <Button asChild variant="outline">
+              <Link to="/dashboard/browse-donations">
+                <Package className="mr-2 h-4 w-4" /> Browse Donations
+              </Link>
+            </Button>
+
+            <Button asChild variant="secondary">
+              <Link to="/dashboard/browse-donations">
+                <Inbox className="mr-2 h-4 w-4" /> Request Food
+              </Link>
+            </Button>
+          </div>
+
+          {/* Stats Section */}
           <div className="grid md:grid-cols-3 gap-6 mt-8">
             <Card>
               <CardHeader>
@@ -115,7 +155,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-primary">
-                  {loading ? "..." : donations.length}
+                  {loading ? "..." : foods.length}
                 </div>
               </CardContent>
             </Card>
@@ -127,7 +167,7 @@ const Dashboard = () => {
                   Pending Requests
                 </CardTitle>
                 <CardDescription>
-                  Food requests awaiting approval
+                  Requests awaiting approval
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -153,6 +193,80 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+
+          {/* My Food Requests Section */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-green-700 mb-4">
+              🍽️ My Food Requests
+            </h2>
+
+            {loading ? (
+              <p>Loading your requests...</p>
+            ) : requests.length === 0 ? (
+              <p className="text-gray-500">
+                You have not made any food requests yet.
+              </p>
+            ) : (
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                {requests.map((req) => (
+                  <Card
+                    key={req._id}
+                    className="shadow-md hover:shadow-lg transition border border-gray-200 rounded-2xl overflow-hidden"
+                  >
+                    {req.foodId?.image && (
+                      <img
+                        src={req.foodId.image}
+                        alt={req.foodId.title}
+                        className="w-full h-40 object-cover"
+                      />
+                    )}
+                    <CardHeader>
+                      <CardTitle className="text-green-700">
+                        {req.foodId?.title || "Food Item"}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-gray-700 space-y-2">
+                      <p className="text-sm">
+                        <strong>Status:</strong>{" "}
+                        <span
+                          className={`${
+                            req.status === "approved"
+                              ? "text-green-600"
+                              : req.status === "pending"
+                              ? "text-yellow-600"
+                              : "text-gray-500"
+                          } font-medium`}
+                        >
+                          {req.status.charAt(0).toUpperCase() +
+                            req.status.slice(1)}
+                        </span>
+                      </p>
+
+                      {req.foodId?.address && (
+                        <p className="text-sm">
+                          <strong>Pickup:</strong> {req.foodId.address}
+                        </p>
+                      )}
+
+                      <p className="text-sm">
+                        <strong>Requested On:</strong>{" "}
+                        {new Date(req.createdAt).toLocaleDateString()}
+                      </p>
+
+                      {req.status === "pending" && (
+                        <Button
+                          onClick={() => handleCancelRequest(req._id)}
+                          className="w-full bg-red-500 hover:bg-red-600 text-white mt-3"
+                        >
+                          Cancel Request
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>
