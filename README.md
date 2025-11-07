@@ -1,129 +1,130 @@
-# 🌍 Jirani Eats
+🌍 Jirani Eats
 
-**Jirani Eats** is a community-driven food sharing and access platform built with the **MERN stack (MongoDB, Express.js, React, Node.js)**.  
-It supports the **United Nations Sustainable Development Goal (SDG) 2 — Zero Hunger**, by connecting individuals, restaurants, and organizations to share surplus food and ensure that no one in the community goes hungry.
+Jirani Eats is a community-driven food sharing and access platform built using the MERN stack (MongoDB, Express.js, React.js, Node.js).
+It directly supports the United Nations Sustainable Development Goal (SDG) 2 — Zero Hunger, by connecting individuals, restaurants, and organizations to share surplus food and ensure no one in the community goes hungry.
 
----
+💡 Vision
 
-## 💡 Vision
+To create a sustainable digital ecosystem where no meal goes to waste, and every person has access to nutritious food.
 
-> To create a sustainable digital ecosystem where no meal goes to waste and every person has access to nutritious food.
+Jirani Eats empowers local communities to reduce food waste, redistribute excess meals, and support those in need through seamless digital collaboration and transparency.
 
-**Jirani Eats** empowers communities to reduce food waste, redistribute excess meals, and support those in need through collaboration and technology.
-
----
-
-## 🚀 Key Features
-
-- 🥗 **Food Donations** – Individuals and restaurants can list surplus food for collection or redistribution.  
-- 🧍 **User Profiles** – Donors, volunteers, and recipients can register and connect.  
-- 🏠 **Community Food Map** – View nearby food donation points, kitchens, and distribution centers.  
-- 📅 **Real-Time Availability** – Track when and where food is available for pickup.  
-- 📦 **Inventory Management** – For organizations managing large donations.  
-- 🔔 **Notifications** – Alerts for new food listings and pickup schedules.  
-- 💚 **Impact Tracking** – Measure total food saved and people reached.  
-
----
-
-## 🧱 Tech Stack
-
-| Layer | Technology |
-|-------|-------------|
-| Frontend | React.js, Tailwind CSS |
-| Backend | Node.js, Express.js |
-| Database | MongoDB (Mongoose) |
-| Authentication | JWT, bcrypt |
-| Deployment | Render / Vercel / Netlify / MongoDB Atlas |
-
----
-
-## ⚙️ Installation & Setup
-
-### 1️⃣ Clone the repository
-```bash
+🚀 Key Features
+Category	Description
+🥗 Food Donations	Individuals, restaurants, and groups can donate surplus food directly through the platform.
+🙌 Food Requests	Recipients or community organizations can request food easily.
+👤 User Profiles & Authentication	Donors, recipients, and volunteers can register, login, and manage their accounts securely (JWT-based).
+🏠 Community Food Map (Upcoming)	Visualize nearby donation and collection points.
+📅 Real-Time Updates	Track available food donations and pickup times.
+📦 Inventory Management	For organizations handling bulk or recurring food donations.
+💬 Contact & Support Center	Integrated Contact Page and automated messaging system.
+🖼️ Gallery Page	Visual showcase of food drives, donations, and community impact.
+🔔 Notifications	Stay updated on new donations, requests, and pickups.
+💚 Impact Tracking	View the total amount of food saved and people served.
+🧱 Tech Stack
+Layer	Technology
+Frontend	React.js, Tailwind CSS, ShadCN UI Components
+Backend	Node.js, Express.js
+Database	MongoDB (Mongoose ODM)
+Authentication	JWT, bcrypt
+API Communication	RESTful APIs (Axios / Fetch)
+Deployment	Render / Vercel / Netlify / MongoDB Atlas
+⚙️ Installation & Setup
+1️⃣ Clone the Repository
 git clone https://github.com/quan0790/Jirani_Eats.git
 cd Jirani_Eats
-2️⃣ Install dependencies
-Backend
-bash
-Copy code
+
+2️⃣ Install Dependencies
+🖥️ Backend
 cd backend
 npm install
-Frontend
-bash
-Copy code
-cd ../frontend
-npm install
-3️⃣ Set up environment variables
-Create a .env file inside backend/:
 
-env
-Copy code
+💻 Frontend
+cd ../jirani-connect-01-main
+npm install
+
+3️⃣ Set Up Environment Variables
+
+Create a .env file in backend/ with the following:
+
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-Optional (if you plan to add cloud storage or payment):
 
-env
-Copy code
+
+Optionally, for cloud storage or integrations:
+
 CLOUDINARY_URL=your_cloudinary_url
 STRIPE_SECRET_KEY=your_stripe_key
-4️⃣ Run the project
-Start the backend:
-bash
-Copy code
+
+
+Create another .env in jirani-connect-01-main/ (frontend):
+
+VITE_API_URL=http://localhost:5000
+
+4️⃣ Run the Project
+🧩 Start Backend
 cd backend
 npm run dev
-Start the frontend:
-bash
-Copy code
-cd ../frontend
-npm start
-App will run on:
 
-Frontend → http://localhost:3000
+🧠 Start Frontend
+cd ../jirani-connect-01-main
+npm run dev
 
-Backend → http://localhost:5000
+
+Frontend: http://localhost:5174
+
+Backend: http://localhost:5000
 
 🗂️ Folder Structure
-bash
-Copy code
 Jirani_Eats/
 │
 ├── backend/
-│   ├── config/           # Database & environment configuration
-│   ├── controllers/      # Core business logic
-│   ├── models/           # Mongoose schemas
-│   ├── routes/           # API endpoints
-│   └── server.js         # Express app entry point
+│   ├── config/             # Database & environment config
+│   ├── controllers/        # Core business logic (auth, food, user, requests)
+│   ├── models/             # Mongoose schemas (User, FoodItem, FoodRequest)
+│   ├── routes/             # REST API endpoints
+│   ├── middleware/         # JWT authentication and access control
+│   ├── server.js           # Express app entry point
+│   └── .env
 │
-├── frontend/
+├── jirani-connect-01-main/
+│   ├── public/             # Static assets
 │   ├── src/
-│   │   ├── components/   # UI components
-│   │   ├── pages/        # Screens and views
-│   │   ├── context/      # Global state (e.g. Auth, Data)
-│   │   └── App.js
-│   └── package.json
+│   │   ├── components/     # Navbar, Footer, and UI components
+│   │   ├── context/        # Global state (Auth, AppContext)
+│   │   ├── pages/          # All pages (Home, About, DonateFood, RequestFood, Gallery, Contacts)
+│   │   ├── assets/         # Project images
+│   │   ├── App.jsx         # App routes and layout
+│   │   └── index.css       # Styling configuration
+│   └── vite.config.js
 │
 └── README.md
-🤝 How It Helps the Community
-♻️ Reduces food waste by redistributing excess food.
 
-🥦 Improves food security by connecting donors and recipients.
+🤝 Community Impact
 
-🤲 Empowers communities to share resources locally.
+♻️ Reduces food waste by redistributing excess meals.
 
-🌱 Promotes sustainability aligned with UN SDG 2: Zero Hunger.
+🥦 Improves food security through localized sharing.
+
+🤲 Empowers communities to collaborate digitally.
+
+🌱 Supports UN SDG 2 (Zero Hunger) — promoting sustainable solutions.
 
 👥 Contributing
-We welcome contributors passionate about sustainability and community impact.
 
-Fork the repo
+We welcome open-source contributions!
 
-Create your branch: git checkout -b feature/YourFeature
+How to Contribute:
 
-Commit changes: git commit -m 'Add feature'
+# 1. Fork the repository
+# 2. Create your feature branch
+git checkout -b feature/YourFeatureName
 
-Push: git push origin feature/YourFeature
+# 3. Commit your changes
+git commit -m "Add new feature: YourFeatureName"
 
-Submit a Pull Request 🚀
+# 4. Push your branch
+git push origin feature/YourFeatureName
+
+# 5. Create a Pull Request 🚀
