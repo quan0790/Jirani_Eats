@@ -3,7 +3,13 @@ import FoodItem from "../models/FoodItem.js";
 // ✅ Create a new food item
 export const createFoodItem = async (req, res) => {
   const { title, description, quantity, unit, pickupLocation } = req.body;
+
   try {
+    if (!req.user) {
+      console.error("❌ No user found in request");
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
     const item = await FoodItem.create({
       title,
       description,
@@ -12,8 +18,10 @@ export const createFoodItem = async (req, res) => {
       pickupLocation,
       postedBy: req.user._id,
     });
+
     res.status(201).json(item);
   } catch (err) {
+    console.error("❌ Error creating food item:", err.message);
     res.status(500).json({ message: err.message });
   }
 };
@@ -22,6 +30,7 @@ export const createFoodItem = async (req, res) => {
 export const getFoodItems = async (req, res) => {
   const search = req.query.search || "";
   const query = { isAvailable: true, title: { $regex: search, $options: "i" } };
+
   try {
     const items = await FoodItem.find(query)
       .populate("postedBy", "name email")
@@ -35,7 +44,10 @@ export const getFoodItems = async (req, res) => {
 // ✅ Get a single food item by ID
 export const getFoodItemById = async (req, res) => {
   try {
-    const item = await FoodItem.findById(req.params.id).populate("postedBy", "name email");
+    const item = await FoodItem.findById(req.params.id).populate(
+      "postedBy",
+      "name email"
+    );
     if (!item) return res.status(404).json({ message: "Food item not found" });
     res.json(item);
   } catch (err) {
@@ -49,8 +61,13 @@ export const updateFoodItem = async (req, res) => {
     const item = await FoodItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Food item not found" });
 
-    if (item.postedBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Not authorized to update this item" });
+    if (
+      item.postedBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this item" });
     }
 
     Object.assign(item, req.body);
@@ -67,8 +84,13 @@ export const deleteFoodItem = async (req, res) => {
     const item = await FoodItem.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Food item not found" });
 
-    if (item.postedBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Not authorized to delete this item" });
+    if (
+      item.postedBy.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this item" });
     }
 
     await item.deleteOne();

@@ -29,9 +29,12 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-6 items-center text-sm font-medium text-foreground">
+            <Link to="/" className="hover:text-primary transition-colors">Home</Link>
             <Link to="/about" className="hover:text-primary transition-colors">About</Link>
             <Link to="/how-it-works" className="hover:text-primary transition-colors">How It Works</Link>
-            <Link to="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
+            <Link to="/gallery" className="hover:text-primary transition-colors">Gallery</Link>
+            <Link to="/contacts" className="hover:text-primary transition-colors">Contacts</Link>
+        
             <Button variant="default" asChild>
               <Link to="/auth">Get Started</Link>
             </Button>
@@ -61,6 +64,8 @@ const Navbar = () => {
             <Link to="/" className="block text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Home</Link>
             <Link to="/about" className="block text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>About</Link>
             <Link to="/how-it-works" className="block text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>How It Works</Link>
+            <Link to="/gallery" className="block text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Gallery</Link>
+            <Link to="/contacts" className="block text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Contacts</Link>
             <Link to="/dashboard" className="block text-sm font-medium text-foreground hover:text-primary transition-colors" onClick={() => setIsMenuOpen(false)}>Dashboard</Link>
             <Button variant="default" className="w-full" asChild>
               <Link to="/auth" onClick={() => setIsMenuOpen(false)}>Get Started</Link>

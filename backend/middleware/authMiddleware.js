@@ -1,41 +1,30 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import User from '../models/User.js';
-
-
-dotenv.config();
-
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 export const protect = async (req, res, next) => {
-let token;
+  let token;
 
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-if (
-req.headers.authorization &&
-req.headers.authorization.startsWith('Bearer')
-) {
-try {
-token = req.headers.authorization.split(' ')[1];
-const decoded = jwt.verify(token, process.env.JWT_SECRET);
-req.user = await User.findById(decoded.id).select('-password');
-next();
-} catch (err) {
-console.error(err);
-return res.status(401).json({ message: 'Not authorized, token failed' });
-}
-}
+      req.user = await User.findById(decoded.id).select("-password");
 
+      if (!req.user) {
+        console.log("❌ No user found for decoded token");
+        return res.status(401).json({ message: "User not found" });
+      }
 
-if (!token) {
-return res.status(401).json({ message: 'Not authorized, no token' });
-}
-};
-
-
-export const admin = (req, res, next) => {
-if (req.user && req.user.role === 'admin') {
-next();
-} else {
-res.status(403).json({ message: 'Require admin role' });
-}
+      next();
+    } catch (error) {
+      console.error("❌ Token verification failed:", error.message);
+      return res.status(401).json({ message: "Not authorized, token failed" });
+    }
+  } else {
+    return res.status(401).json({ message: "Not authorized, no token" });
+  }
 };

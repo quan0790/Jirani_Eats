@@ -9,4 +9,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    historyApiFallback: true, // ✅ Fixes "404 on refresh" issue for React Router
+    port: 5173, // optional: specify default port
+  },
 });

@@ -26,6 +26,14 @@ const Footer = () => {
               <ul className="space-y-2">
                 <li>
                   <Link
+                    to="/"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    Home
+                  </Link>
+                </li>
+                <li>
+                  <Link
                     to="/how-it-works"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
@@ -42,10 +50,10 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link
-                    to="/dashboard"
+                    to="/gallery"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
-                    Dashboard
+                    Gallery
                   </Link>
                 </li>
               </ul>
@@ -56,7 +64,7 @@ const Footer = () => {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    to="/support"
+                    to="/contacts"
                     className="text-sm text-muted-foreground hover:text-foreground"
                   >
                     Contact Support
@@ -77,10 +85,10 @@ const Footer = () => {
 
         {/* Footer Bottom */}
         <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center text-sm text-muted-foreground">
-          <p>© 2025 JiraniEat. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} JiraniEat. All rights reserved.</p>
           <div className="flex items-center space-x-1 mt-2 md:mt-0">
             <span>Made with</span>
-            <Heart className="h-4 w-4 text-destructive fill-destructive" />
+            <Heart className="h-4 w-4 text-destructive fill-destructive mx-1" />
             <span>for the community</span>
           </div>
         </div>

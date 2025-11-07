@@ -1,158 +1,213 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-// ✅ Import API functions
-import { registerUser, loginUser } from "@/api";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [signupData, setSignupData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const { signup, login } = useAuth();
 
-  // ✅ Handle login
-  const handleLogin = async () => {
+  const [mode, setMode] = useState("login"); // "login" or "signup"
+
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!loginData.email || !loginData.password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      console.log("🔵 Sending login request:", loginData);
-      const { data } = await loginUser(loginData); // ✅ fixed
-      console.log("✅ Login response:", data);
-      localStorage.setItem("token", data.token);
-      navigate("/");
+      await login(loginData); // handled by AuthContext
     } catch (err) {
-      console.error("❌ Login failed:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "Login failed");
+      console.error(err);
+      setError("Login failed. Check your credentials.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ Handle signup
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (!signupData.name || !signupData.email || !signupData.password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      console.log("🔵 Sending signup request:", signupData);
-      const { data } = await registerUser(signupData); // ✅ fixed
-      console.log("✅ Signup response:", data);
-      localStorage.setItem("token", data.token);
-      navigate("/");
+      await signup(signupData);
+      // ✅ Switch to login after successful signup
+      setMode("login");
+      setSignupData({ name: "", email: "", password: "" });
     } catch (err) {
-      console.error("❌ Signup failed:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "Signup failed");
+      console.error(err);
+      setError("Signup failed. Try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto">
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
 
-            {/* 🔐 LOGIN TAB */}
-            <TabsContent value="login">
+      <main className="flex-1 container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          {/* Left Info Section */}
+          <div className="hidden lg:flex flex-col justify-center items-start gap-6 pl-6">
+            <div className="bg-gradient-to-br from-primary to-secondary rounded-2xl p-8 shadow-lg text-white w-full">
+              <h2 className="text-4xl font-extrabold">Welcome to JiraniEat</h2>
+              <p className="mt-4 text-lg max-w-xl">
+                Share surplus food, request help, and connect with neighbors. Sign up to make
+                a difference in your community.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Auth Card */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-semibold">
+                  {mode === "login" ? "Sign in to your account" : "Create your account"}
+                </h3>
+                <button
+                  onClick={() => {
+                    setMode(mode === "login" ? "signup" : "login");
+                    setError("");
+                  }}
+                  className="text-sm text-muted-foreground underline hover:text-foreground"
+                >
+                  {mode === "login" ? "Need an account?" : "Already have an account?"}
+                </button>
+              </div>
+
               <Card>
-                <CardHeader>
-                  <CardTitle>Welcome Back</CardTitle>
-                  <CardDescription>
-                    Enter your credentials to access your account
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={loginData.email}
-                    onChange={(e) =>
-                      setLoginData({ ...loginData, email: e.target.value })
-                    }
-                    placeholder="your@email.com"
-                  />
-                  <Label>Password</Label>
-                  <Input
-                    type="password"
-                    value={loginData.password}
-                    onChange={(e) =>
-                      setLoginData({ ...loginData, password: e.target.value })
-                    }
-                    placeholder="••••••••"
-                  />
-                  {error && (
-                    <p className="text-red-500 text-sm text-center">{error}</p>
+                <CardContent className="p-6">
+                  {mode === "login" ? (
+                    <form onSubmit={handleLogin} className="space-y-4">
+                      <div>
+                        <Label>Email</Label>
+                        <Input
+                          type="email"
+                          value={loginData.email}
+                          onChange={(e) =>
+                            setLoginData({ ...loginData, email: e.target.value })
+                          }
+                          placeholder="you@example.com"
+                        />
+                      </div>
+                      <div>
+                        <Label>Password</Label>
+                        <Input
+                          type="password"
+                          value={loginData.password}
+                          onChange={(e) =>
+                            setLoginData({ ...loginData, password: e.target.value })
+                          }
+                          placeholder="••••••••"
+                        />
+                      </div>
+
+                      {error && <p className="text-sm text-red-500">{error}</p>}
+
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? "Signing in..." : "Sign In"}
+                      </Button>
+
+                      <div className="text-sm text-center mt-2">
+                        <RouterLink to="/" className="text-primary underline">
+                          Back to Home
+                        </RouterLink>
+                      </div>
+                    </form>
+                  ) : (
+                    <form onSubmit={handleSignup} className="space-y-4">
+                      <div>
+                        <Label>Full name</Label>
+                        <Input
+                          type="text"
+                          value={signupData.name}
+                          onChange={(e) =>
+                            setSignupData({ ...signupData, name: e.target.value })
+                          }
+                          placeholder="John Doe"
+                        />
+                      </div>
+
+                      <div>
+                        <Label>Email</Label>
+                        <Input
+                          type="email"
+                          value={signupData.email}
+                          onChange={(e) =>
+                            setSignupData({ ...signupData, email: e.target.value })
+                          }
+                          placeholder="you@example.com"
+                        />
+                      </div>
+
+                      <div>
+                        <Label>Password</Label>
+                        <Input
+                          type="password"
+                          value={signupData.password}
+                          onChange={(e) =>
+                            setSignupData({ ...signupData, password: e.target.value })
+                          }
+                          placeholder="Create a strong password"
+                        />
+                      </div>
+
+                      {error && <p className="text-sm text-red-500">{error}</p>}
+
+                      <Button type="submit" className="w-full" disabled={loading}>
+                        {loading ? "Creating account..." : "Create Account"}
+                      </Button>
+
+                      <div className="text-sm text-center mt-2">
+                        By creating an account you agree to our{" "}
+                        <RouterLink to="/legal" className="underline text-primary">
+                          Terms & Privacy
+                        </RouterLink>
+                      </div>
+                    </form>
                   )}
-                  <Button className="w-full" onClick={handleLogin}>
-                    Login
-                  </Button>
                 </CardContent>
               </Card>
-            </TabsContent>
 
-            {/* 🆕 SIGNUP TAB */}
-            <TabsContent value="signup">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Account</CardTitle>
-                  <CardDescription>
-                    Join JiraniEat to start sharing or receiving food
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Label>Full Name</Label>
-                  <Input
-                    type="text"
-                    value={signupData.name}
-                    onChange={(e) =>
-                      setSignupData({ ...signupData, name: e.target.value })
-                    }
-                    placeholder="John Doe"
-                  />
-                  <Label>Email</Label>
-                  <Input
-                    type="email"
-                    value={signupData.email}
-                    onChange={(e) =>
-                      setSignupData({ ...signupData, email: e.target.value })
-                    }
-                    placeholder="your@email.com"
-                  />
-                  <Label>Password</Label>
-                  <Input
-                    type="password"
-                    value={signupData.password}
-                    onChange={(e) =>
-                      setSignupData({ ...signupData, password: e.target.value })
-                    }
-                    placeholder="••••••••"
-                  />
-                  {error && (
-                    <p className="text-red-500 text-sm text-center">{error}</p>
-                  )}
-                  <Button className="w-full" onClick={handleSignup}>
-                    Sign Up
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+              <div className="mt-4 text-center text-sm text-muted-foreground">
+                Need help?{" "}
+                <RouterLink to="/contacts" className="underline text-foreground">
+                  Contact support
+                </RouterLink>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );
