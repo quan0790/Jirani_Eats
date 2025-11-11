@@ -23,6 +23,7 @@ const app = express();
 // Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.get("/healthz", (req, res) => res.status(200).json({ status: "OK" }));
 
 // CORS config
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
