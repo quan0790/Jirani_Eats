@@ -1,16 +1,21 @@
 import express from "express";
-import { createFoodItem, getFoodItems, getFoodById } from "../controllers/foodController.js";
+import {
+  createFoodItem,
+  getFoodItems,
+  getFoodById,
+  updateFoodItem,
+  deleteFoodItem,
+} from "../controllers/foodController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// POST - Create new food item (protected)
-router.post("/", protect, createFoodItem);
+router.use(protect);
 
-// GET - Get all available foods
-router.get("/", getFoodItems);
-
-// GET - Get single food by ID
+router.post("/", createFoodItem);
+router.get("/", getFoodItems); // all logged-in users can see donations
 router.get("/:id", getFoodById);
+router.put("/:id", updateFoodItem);
+router.delete("/:id", deleteFoodItem);
 
 export default router;

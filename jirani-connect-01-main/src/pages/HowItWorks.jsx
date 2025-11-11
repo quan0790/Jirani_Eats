@@ -1,4 +1,6 @@
 import React from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import { Users, Gift, Handshake, MapPin } from "lucide-react";
 
@@ -58,66 +60,75 @@ const HowItWorks = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16 px-6 md:px-20">
-      <div className="text-center mb-16">
-        <motion.h1
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl font-bold text-gray-800"
-        >
-          How It Works
-        </motion.h1>
-        <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-          Sharing and receiving food has never been easier. Follow these simple steps to start making a difference today.
-        </p>
-      </div>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* ✅ Navbar at the top */}
+      <Navbar />
 
-      {/* For Donors */}
-      <section className="mb-20">
-        <h2 className="text-2xl font-semibold text-green-700 text-center mb-8">
-          For Donors
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {stepsDonor.map((step, index) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.2 }}
-              className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-2xl transition"
-            >
-              <div className="flex justify-center mb-4">{step.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-800">{step.title}</h3>
-              <p className="text-gray-600 mt-2 text-sm">{step.desc}</p>
-              <span className="text-gray-400 text-xs mt-3 block">Step {step.id}</span>
-            </motion.div>
-          ))}
+      {/* ✅ Main Content */}
+      <main className="flex-1 py-16 px-6 md:px-20">
+        <div className="text-center mb-16">
+          <motion.h1
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-4xl font-bold text-gray-800"
+          >
+            How It Works
+          </motion.h1>
+          <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
+            Sharing and receiving food has never been easier. Follow these simple steps to start making a difference today.
+          </p>
         </div>
-      </section>
 
-      {/* For Receivers */}
-      <section>
-        <h2 className="text-2xl font-semibold text-blue-700 text-center mb-8">
-          For Receivers
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {stepsReceiver.map((step, index) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.2 }}
-              className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-2xl transition"
-            >
-              <div className="flex justify-center mb-4">{step.icon}</div>
-              <h3 className="text-lg font-semibold text-gray-800">{step.title}</h3>
-              <p className="text-gray-600 mt-2 text-sm">{step.desc}</p>
-              <span className="text-gray-400 text-xs mt-3 block">Step {step.id}</span>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+        {/* For Donors */}
+        <section className="mb-20">
+          <h2 className="text-2xl font-semibold text-green-700 text-center mb-8">
+            For Donors
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stepsDonor.map((step, index) => (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.2 }}
+                className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-2xl transition"
+              >
+                <div className="flex justify-center mb-4">{step.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-800">{step.title}</h3>
+                <p className="text-gray-600 mt-2 text-sm">{step.desc}</p>
+                <span className="text-gray-400 text-xs mt-3 block">Step {step.id}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
+        {/* For Receivers */}
+        <section>
+          <h2 className="text-2xl font-semibold text-blue-700 text-center mb-8">
+            For Receivers
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {stepsReceiver.map((step, index) => (
+              <motion.div
+                key={step.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.2 }}
+                className="bg-white shadow-lg rounded-2xl p-6 text-center hover:shadow-2xl transition"
+              >
+                <div className="flex justify-center mb-4">{step.icon}</div>
+                <h3 className="text-lg font-semibold text-gray-800">{step.title}</h3>
+                <p className="text-gray-600 mt-2 text-sm">{step.desc}</p>
+                <span className="text-gray-400 text-xs mt-3 block">Step {step.id}</span>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </main>
+
+      {/* ✅ Footer at the bottom */}
+      <Footer />
     </div>
   );
 };

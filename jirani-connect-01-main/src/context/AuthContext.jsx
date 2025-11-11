@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load stored auth data on refresh
+  // Load stored auth data on refresh
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
@@ -23,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ SIGNUP FUNCTION
+  // SIGNUP FUNCTION
   const signup = async (formData) => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/register", {
@@ -33,19 +33,16 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Signup failed");
 
-      if (res.ok) {
-        alert("🎉 Account created successfully! Please log in.");
-      } else {
-        alert(data.message || "Signup failed. Try again.");
-      }
+      return true; // Success
     } catch (error) {
       console.error("Signup Error:", error);
-      alert("Signup failed. Please try again later.");
+      throw new Error(error.message || "Signup failed. Try again later.");
     }
   };
 
-  // ✅ LOGIN FUNCTION
+  // LOGIN FUNCTION
   const login = async ({ email, password }) => {
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
@@ -54,28 +51,29 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
-
-      if (res.ok) {
-        setUser(data.user);
-        setToken(data.token);
-
-        // persist in localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.token);
-
-        alert("✅ Login successful!");
-        navigate("/dashboard");
-      } else {
-        alert(data.message || "Invalid email or password.");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Invalid email or password");
       }
+
+      const data = await res.json();
+      setUser(data.user);
+      setToken(data.token);
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+
+      navigate("/dashboard");
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Login failed. Please try again later.");
+      throw new Error(
+        error.message.includes("Failed to fetch")
+          ? "Cannot connect to server. Make sure backend is running on port 5000."
+          : error.message
+      );
     }
   };
 
-  // ✅ UPDATE USER (used for Account profile updates)
   const updateUser = (updatedData) => {
     setUser((prev) => {
       const newUser = { ...prev, ...updatedData };
@@ -84,7 +82,6 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
-  // ✅ LOGOUT FUNCTION
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -95,20 +92,12 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        token,
-        signup,
-        login,
-        logout,
-        updateUser,
-        loading,
-      }}
+      value={{ user, token, signup, login, logout, updateUser, loading }}
     >
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-// ✅ Hook for easy access
+// Hook for easy access
 export const useAuth = () => useContext(AuthContext);

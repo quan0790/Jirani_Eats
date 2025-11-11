@@ -11,6 +11,14 @@ const foodRequestSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    pickupTime: {
+      type: Date,
+      required: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
     message: {
       type: String,
       default: "",

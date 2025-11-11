@@ -13,14 +13,15 @@ Jirani Eats empowers local communities to reduce food waste, redistribute excess
 Category	Description
 🥗 Food Donations	Individuals, restaurants, and groups can donate surplus food directly through the platform.
 🙌 Food Requests	Recipients or community organizations can request food easily.
-👤 User Profiles & Authentication	Donors, recipients, and volunteers can register, login, and manage their accounts securely (JWT-based).
+👤 User Profiles & Authentication	Donors, recipients, and volunteers can register, log in, and manage their accounts securely (JWT-based).
 🏠 Community Food Map (Upcoming)	Visualize nearby donation and collection points.
-📅 Real-Time Updates	Track available food donations and pickup times.
+📅 Real-Time Updates	Track available food donations, requests, and pickup times.
 📦 Inventory Management	For organizations handling bulk or recurring food donations.
-💬 Contact & Support Center	Integrated Contact Page and automated messaging system.
+💬 Contact & Support Center	Integrated contact page and automated messaging system.
 🖼️ Gallery Page	Visual showcase of food drives, donations, and community impact.
 🔔 Notifications	Stay updated on new donations, requests, and pickups.
 💚 Impact Tracking	View the total amount of food saved and people served.
+✅ Request Approval Workflow	Donors can approve or reject incoming requests directly from their dashboard.
 🧱 Tech Stack
 Layer	Technology
 Frontend	React.js, Tailwind CSS, ShadCN UI Components
@@ -35,44 +36,48 @@ git clone https://github.com/quan0790/Jirani_Eats.git
 cd Jirani_Eats
 
 2️⃣ Install Dependencies
-🖥️ Backend
+
+Backend:
+
 cd backend
 npm install
 
-💻 Frontend
+
+Frontend:
+
 cd ../jirani-connect-01-main
 npm install
 
 3️⃣ Set Up Environment Variables
 
-Create a .env file in backend/ with the following:
+Backend (backend/.env):
 
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
-
-
-Optionally, for cloud storage or integrations:
-
 CLOUDINARY_URL=your_cloudinary_url
 STRIPE_SECRET_KEY=your_stripe_key
 
 
-Create another .env in jirani-connect-01-main/ (frontend):
+Frontend (jirani-connect-01-main/.env):
 
 VITE_API_URL=http://localhost:5000
 
 4️⃣ Run the Project
-🧩 Start Backend
+
+Start Backend:
+
 cd backend
 npm run dev
 
-🧠 Start Frontend
+
+Start Frontend:
+
 cd ../jirani-connect-01-main
 npm run dev
 
 
-Frontend: http://localhost:5174
+Frontend: http://localhost:5173
 
 Backend: http://localhost:5000
 
@@ -93,7 +98,7 @@ Jirani_Eats/
 │   ├── src/
 │   │   ├── components/     # Navbar, Footer, and UI components
 │   │   ├── context/        # Global state (Auth, AppContext)
-│   │   ├── pages/          # All pages (Home, About, DonateFood, RequestFood, Gallery, Contacts)
+│   │   ├── pages/          # Pages (Home, About, DonateFood, RequestFood, Gallery, Contacts)
 │   │   ├── assets/         # Project images
 │   │   ├── App.jsx         # App routes and layout
 │   │   └── index.css       # Styling configuration
@@ -110,6 +115,8 @@ Jirani_Eats/
 🤲 Empowers communities to collaborate digitally.
 
 🌱 Supports UN SDG 2 (Zero Hunger) — promoting sustainable solutions.
+
+✅ Request/Approval workflow allows donors to manage contributions effectively.
 
 👥 Contributing
 

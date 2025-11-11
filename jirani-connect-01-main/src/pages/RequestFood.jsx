@@ -1,122 +1,130 @@
+import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 const RequestFood = () => {
-  const [food, setFood] = useState(null);
-  const [formData, setFormData] = useState({
-    pickupLocation: "",
-    message: "",
-  });
-
+  const { id } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const token = localStorage.getItem("token");
-  const foodId = new URLSearchParams(location.search).get("foodId");
+
+  const [food, setFood] = useState(null);
+  const [requesting, setRequesting] = useState(false);
+
+  // Form state
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [pickupTime, setPickupTime] = useState("");
 
   useEffect(() => {
-    if (!foodId) return;
+    if (!id) return;
+
     const fetchFood = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/foods/${foodId}`);
+        const res = await fetch(`http://localhost:5000/api/foods/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch food");
         const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to fetch food item");
         setFood(data);
-      } catch (error) {
-        console.error("❌ Error fetching food:", error);
-        toast.error("Could not load food details.");
+        // Pre-fill pickup location if available
+        if (data.pickupLocation) {
+          setPickupLocation(typeof data.pickupLocation === "object" ? data.pickupLocation.address : data.pickupLocation);
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to load food details");
       }
     };
+
     fetchFood();
-  }, [foodId]);
+  }, [id, token]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!token) {
-      toast.error("Please log in first.");
-      return navigate("/auth");
+  const handleRequest = async () => {
+    if (!pickupLocation || !phoneNumber || !pickupTime) {
+      toast.error("Please fill in all required fields");
+      return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/requests", {
+      setRequesting(true);
+      const res = await fetch(`http://localhost:5000/api/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          foodId,
-          ...formData,
+          foodId: id,
+          pickupLocation,
+          phoneNumber,
+          pickupTime,
+          status: "pending",
         }),
       });
+      if (!res.ok) throw new Error("Failed to request food");
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to send request");
-
-      toast.success("Food request submitted successfully!");
-      navigate("/dashboard");
+      toast.success("Food requested successfully!");
+      navigate("/requests"); // Redirect to requests page
     } catch (err) {
-      console.error("❌ Request error:", err);
-      toast.error("Error submitting request. Please try again.");
+      console.error(err);
+      toast.error(err.message || "Error requesting food");
+    } finally {
+      setRequesting(false);
     }
   };
 
+  if (!food) return <p className="text-center py-8">Loading food details...</p>;
+
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       <Navbar />
+      <main className="container mx-auto py-16">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-6 space-y-6">
+          <h1 className="text-3xl font-bold mb-4">{food.title}</h1>
+          <p><strong>Quantity:</strong> {food.quantity} {food.unit}</p>
+          <p>
+            <strong>Pickup Location:</strong>{" "}
+            {typeof food.pickupLocation === "object" ? food.pickupLocation.address : food.pickupLocation}
+          </p>
 
-      <main className="flex-1 container mx-auto px-4 py-12 max-w-2xl">
-        <h1 className="text-3xl font-bold mb-6 text-center text-foreground">
-          Request Food
-        </h1>
-
-        {food && (
-          <div className="mb-6 p-4 border rounded-lg bg-green-50">
-            <h2 className="text-xl font-semibold text-green-700">{food.title}</h2>
-            <p className="text-sm text-gray-700 mt-1">{food.description}</p>
-            <p className="text-sm mt-1">
-              <strong>Location:</strong> {food.address || "Not provided"}
-            </p>
-            <p className="text-sm">
-              <strong>Expires:</strong>{" "}
-              {food.expiryDate
-                ? new Date(food.expiryDate).toLocaleDateString()
-                : "N/A"}
-            </p>
+          {/* Request Form */}
+          <div className="space-y-3">
+            <input
+              type="text"
+              placeholder="Your Pickup Location"
+              className="input w-full"
+              value={pickupLocation}
+              onChange={(e) => setPickupLocation(e.target.value)}
+            />
+            <input
+              type="text"
+              placeholder="Your Phone Number"
+              className="input w-full"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+            />
+            <input
+              type="datetime-local"
+              className="input w-full"
+              value={pickupTime}
+              onChange={(e) => setPickupTime(e.target.value)}
+            />
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            name="pickupLocation"
-            placeholder="Enter your pickup location"
-            value={formData.pickupLocation}
-            onChange={handleChange}
-            required
-          />
-          <Textarea
-            name="message"
-            placeholder="Additional details (e.g. preferred pickup time, contact info)"
-            value={formData.message}
-            onChange={handleChange}
-          />
-          <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white">
-            Submit Request
+          <Button onClick={handleRequest} disabled={requesting} className="mt-4 w-full">
+            {requesting ? "Requesting..." : "Request Food"}
           </Button>
-        </form>
-      </main>
 
+          <Button onClick={() => navigate("/dashboard/browse-donations")} variant="outline" className="mt-2 w-full">
+            Back to Donations
+          </Button>
+        </div>
+      </main>
       <Footer />
     </div>
   );

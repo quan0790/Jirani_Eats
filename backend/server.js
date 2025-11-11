@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
 import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -13,18 +15,17 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
 
-// ✅ Connect to MongoDB
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// ✅ Body parser middleware
+// Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS configuration
+// CORS config
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -40,30 +41,50 @@ app.use(
   })
 );
 
-// ✅ Preflight (OPTIONS) requests
 app.options("*", cors());
 
-// ✅ Health check route
+// Health check
 app.get("/", (req, res) => {
   res.status(200).send("🌍 JiraniEats API is running successfully...");
 });
 
-// ✅ Main API routes
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/contacts", contactRoutes);
 
-// ✅ Error handling middleware
+// Error middleware
 app.use(notFound);
 app.use(errorHandler);
 
-// ✅ Dynamic server startup (avoids port conflicts)
 const PORT = process.env.PORT || 5000;
 
+// HTTP server for Socket.IO
+const server = http.createServer(app);
+
+// Socket.IO setup
+export const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  },
+});
+
+// Socket.IO events
+io.on("connection", (socket) => {
+  console.log("⚡ New client connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("❌ Client disconnected:", socket.id);
+  });
+});
+
+// Start server
 const startServer = (port) => {
-  const server = app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`);
   });
 

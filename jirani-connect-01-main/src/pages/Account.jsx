@@ -82,7 +82,18 @@ const Account = () => {
       <Navbar />
 
       <main className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-6">
+          {/* Back to Dashboard Button */}
+          <div className="flex justify-start">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/dashboard")}
+            >
+              ← Back to Dashboard
+            </Button>
+          </div>
+
+          {/* Profile Card */}
           <Card className="shadow-lg rounded-2xl">
             <CardHeader className="flex flex-col items-center">
               <User className="h-16 w-16 text-primary mb-2" />

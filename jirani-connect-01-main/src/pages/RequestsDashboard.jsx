@@ -1,50 +1,61 @@
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
-const RequestsDashboard = () => {
-  const [requests, setRequests] = useState([]);
+const MyRequests = () => {
+  const { user } = useAuth();
   const token = localStorage.getItem("token");
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/requests", {
+        setLoading(true);
+        const res = await fetch(`http://localhost:5000/api/requests`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!res.ok) throw new Error("Failed to fetch requests");
         const data = await res.json();
-        setRequests(data);
+        setRequests(data.filter(req => req.requestedBy?._id === user._id));
       } catch (err) {
-        console.error("❌ Error fetching requests:", err);
+        console.error(err);
+        toast.error("Failed to load requests");
+      } finally {
+        setLoading(false);
       }
     };
     fetchRequests();
-  }, [token]);
+  }, [token, user]);
+
+  if (loading) return <p className="text-center py-8">Loading requests...</p>;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white">
       <Navbar />
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-4">My Food Requests</h1>
-        {requests.length === 0 ? (
-          <p>No requests yet.</p>
-        ) : (
-          <ul className="space-y-4">
-            {requests.map((req) => (
-              <li key={req._id} className="border rounded-lg p-4">
-                <h2 className="text-lg font-semibold">{req.foodType}</h2>
-                <p>{req.message}</p>
-                <small className="text-muted-foreground">
-                  Submitted on {new Date(req.createdAt).toLocaleString()}
-                </small>
-              </li>
-            ))}
-          </ul>
-        )}
+      <main className="container mx-auto py-16">
+        <h1 className="text-3xl font-bold mb-8">My Food Requests</h1>
+        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {requests.map(req => (
+            <Card key={req._id} className="shadow-md hover:shadow-lg transition border border-gray-200 rounded-2xl overflow-hidden">
+              <CardHeader>
+                <CardTitle>{req.food?.title}</CardTitle>
+                <CardDescription>Status: {req.status}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p><strong>Quantity:</strong> {req.food?.quantity} {req.food?.unit}</p>
+                <p><strong>Pickup:</strong> {typeof req.food?.pickupLocation === "object" ? req.food.pickupLocation.address : req.food?.pickupLocation}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </main>
       <Footer />
     </div>
   );
 };
 
-export default RequestsDashboard;
+export default MyRequests;

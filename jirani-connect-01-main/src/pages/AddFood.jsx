@@ -1,19 +1,25 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardContent,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { io } from "socket.io-client";
 
 const AddFood = () => {
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // Redirect if user is not a donor
+  useEffect(() => {
+    if (user?.role === "user") {
+      toast.error("You cannot donate food as a receiver.");
+      navigate("/dashboard");
+    }
+  }, [user, navigate]);
+
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -24,55 +30,39 @@ const AddFood = () => {
     expiryDate: "",
   });
 
-  // ✅ Handle input change
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [socket, setSocket] = useState(null);
+  useEffect(() => {
+    const s = io("http://localhost:5000", { auth: { token } });
+    setSocket(s);
+    return () => s.disconnect();
+  }, [token]);
 
-  // ✅ Handle form submit
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!token) {
-      toast.error("Please log in to list food donations.");
-      return;
-    }
+    if (!token) return toast.error("Please log in.");
 
     setLoading(true);
     try {
       const res = await fetch("http://localhost:5000/api/foods", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: form.title,
-          description: form.description,
-          quantity: form.quantity,
-          unit: form.unit,
-          expiryDate: form.expiryDate,
-          pickupLocation: { address: form.address },
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ ...form, pickupLocation: { address: form.address } }),
       });
 
       if (res.ok) {
+        const newFood = await res.json();
         toast.success("✅ Food listed successfully!");
-        setForm({
-          title: "",
-          description: "",
-          quantity: "",
-          unit: "portion",
-          address: "",
-          expiryDate: "",
-        });
+        socket?.emit("foodAdded", newFood);
+        setForm({ title: "", description: "", quantity: "", unit: "portion", address: "", expiryDate: "" });
       } else {
         const err = await res.json();
         toast.error(err.message || "Failed to list food.");
       }
     } catch (err) {
       console.error(err);
-      toast.error("Error connecting to the server. Please try again later.");
+      toast.error("Error connecting to the server.");
     } finally {
       setLoading(false);
     }
@@ -80,130 +70,47 @@ const AddFood = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-green-50 to-white">
-      {/* 🌿 Navbar */}
       <Navbar />
+      <main className="flex-1 container mx-auto px-4 py-12 flex flex-col items-center">
+        <div className="mb-6 text-left w-full max-w-lg">
+          <Button variant="outline" onClick={() => navigate("/dashboard")} className="flex items-center gap-2">
+            ← Back to Dashboard
+          </Button>
+        </div>
 
-      {/* 🥗 Main Form Section */}
-      <main className="flex-1 container mx-auto px-4 py-12 flex justify-center items-start">
         <Card className="w-full max-w-lg shadow-lg border border-gray-200 bg-white rounded-2xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-extrabold text-green-700">
-              🍲 List Your Food
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              Share surplus food with those in need. Fill in the details below.
-            </CardDescription>
+            <CardTitle className="text-3xl font-extrabold text-green-700">🍲 List Your Food</CardTitle>
+            <CardDescription className="text-gray-600">Share surplus food with those in need.</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Title */}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Food Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="e.g., Cooked Rice, Bread, Fruits"
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  required
-                />
-              </div>
-
+              <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Food Title" required className="w-full border rounded p-2" />
               {/* Description */}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  value={form.description}
-                  onChange={handleChange}
-                  placeholder="Brief description of the food (optional)"
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  rows="3"
-                />
-              </div>
-
-              {/* Quantity */}
+              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description (optional)" className="w-full border rounded p-2" rows={3} />
+              {/* Quantity & Unit */}
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Quantity <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={form.quantity}
-                    onChange={handleChange}
-                    placeholder="e.g., 5"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Unit
-                  </label>
-                  <input
-                    type="text"
-                    name="unit"
-                    value={form.unit}
-                    onChange={handleChange}
-                    placeholder="e.g., portions, kg"
-                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  />
-                </div>
+                <input type="number" name="quantity" value={form.quantity} onChange={handleChange} placeholder="Quantity" required className="w-full border rounded p-2" />
+                <select name="unit" value={form.unit} onChange={handleChange} className="w-full border rounded p-2">
+                  <option value="portion">Portion</option>
+                  <option value="kg">Kg</option>
+                  <option value="plates">Plates</option>
+                  <option value="bottles">Bottles</option>
+                  <option value="packets">Packets</option>
+                </select>
               </div>
-
-              {/* Pickup Address */}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Pickup Location <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  value={form.address}
-                  onChange={handleChange}
-                  placeholder="e.g., 123 Nairobi St, CBD"
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                  required
-                />
-              </div>
-
-              {/* Expiry Date */}
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Expiry Date
-                </label>
-                <input
-                  type="date"
-                  name="expiryDate"
-                  value={form.expiryDate}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg transition duration-200"
-              >
-                {loading ? "Listing..." : "List Food"}
-              </Button>
+              {/* Address */}
+              <input type="text" name="address" value={form.address} onChange={handleChange} placeholder="Pickup Address" required className="w-full border rounded p-2" />
+              {/* Expiry */}
+              <input type="date" name="expiryDate" value={form.expiryDate} onChange={handleChange} className="w-full border rounded p-2" />
+              {/* Submit */}
+              <Button type="submit" disabled={loading} className="w-full bg-green-600 text-white">{loading ? "Listing..." : "List Food"}</Button>
             </form>
           </CardContent>
         </Card>
       </main>
-
-      {/* 🌾 Footer */}
       <Footer />
     </div>
   );

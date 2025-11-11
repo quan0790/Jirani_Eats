@@ -1,34 +1,32 @@
 import { useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
 
 const Auth = () => {
   const { signup, login } = useAuth();
+  const navigate = useNavigate();
 
   const [mode, setMode] = useState("login"); // "login" or "signup"
-
   const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const [signupData, setSignupData] = useState({ name: "", email: "", password: "" });
-
+  const [signupData, setSignupData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "receiver", // default role matches backend
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Handle Login
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!loginData.email || !loginData.password) {
       setError("Please fill in all fields.");
       return;
@@ -36,19 +34,23 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      await login(loginData); // handled by AuthContext
+      const user = await login(loginData);
+
+      // Redirect based on role
+      if (user.role === "donor") navigate("/add-food");
+      else navigate("/dashboard/browse-donations");
     } catch (err) {
       console.error(err);
-      setError("Login failed. Check your credentials.");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle Signup
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!signupData.name || !signupData.email || !signupData.password) {
       setError("Please fill in all fields.");
       return;
@@ -57,12 +59,14 @@ const Auth = () => {
     setLoading(true);
     try {
       await signup(signupData);
-      // ✅ Switch to login after successful signup
+
+      // After signup, switch to login
       setMode("login");
-      setSignupData({ name: "", email: "", password: "" });
+      setSignupData({ name: "", email: "", password: "", role: "receiver" });
+      setError("");
     } catch (err) {
-      console.error(err);
-      setError("Signup failed. Try again.");
+      console.error("Signup Error:", err);
+      setError(err.message || "Server error during registration");
     } finally {
       setLoading(false);
     }
@@ -178,6 +182,21 @@ const Auth = () => {
                           }
                           placeholder="Create a strong password"
                         />
+                      </div>
+
+                      {/* Role Selection */}
+                      <div>
+                        <Label>Role</Label>
+                        <select
+                          value={signupData.role}
+                          onChange={(e) =>
+                            setSignupData({ ...signupData, role: e.target.value })
+                          }
+                          className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
+                        >
+                          <option value="receiver">Receiver</option>
+                          <option value="donor">Donor</option>
+                        </select>
                       </div>
 
                       {error && <p className="text-sm text-red-500">{error}</p>}
