@@ -15,24 +15,32 @@ import { notFound, errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
 
-// Connect to MongoDB
+// ✅ Connect to MongoDB
 connectDB();
 
 const app = express();
 
-// Body parser
+// ✅ Body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ✅ Health check endpoint
 app.get("/healthz", (req, res) => res.status(200).json({ status: "OK" }));
 
-// CORS config
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+// ✅ CORS Configuration (Fixed)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://jirani-eats-five.vercel.app", // ✅ Your deployed frontend
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn("❌ Blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -42,30 +50,31 @@ app.use(
   })
 );
 
+// ✅ Allow preflight requests
 app.options("*", cors());
 
-// Health check
+// ✅ Root route
 app.get("/", (req, res) => {
   res.status(200).send("🌍 JiraniEats API is running successfully...");
 });
 
-// API Routes
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/foods", foodRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/contacts", contactRoutes);
 
-// Error middleware
+// ✅ Error middleware
 app.use(notFound);
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// HTTP server for Socket.IO
+// ✅ Create HTTP server for Socket.IO
 const server = http.createServer(app);
 
-// Socket.IO setup
+// ✅ Socket.IO setup with same CORS config
 export const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -74,7 +83,7 @@ export const io = new Server(server, {
   },
 });
 
-// Socket.IO events
+// ✅ Socket.IO events
 io.on("connection", (socket) => {
   console.log("⚡ New client connected:", socket.id);
 
@@ -83,7 +92,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// Start server
+// ✅ Start server with automatic port recovery
 const startServer = (port) => {
   server.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`);
