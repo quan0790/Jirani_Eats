@@ -15,7 +15,7 @@ const FoodList = () => {
   useEffect(() => {
     const fetchFoods = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/foods");
+        const res = await fetch("https://jirani-eats-6.onrender.com/api/foods");
         const data = await res.json();
         setFoods(data);
       } catch (err) {
@@ -36,7 +36,7 @@ const FoodList = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/requests", {
+      const res = await fetch("https://jirani-eats-6.onrender.com/api/requests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

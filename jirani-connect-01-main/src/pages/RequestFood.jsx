@@ -25,7 +25,7 @@ const RequestFood = () => {
 
     const fetchFood = async () => {
       try {
-        const res = await fetch(`http://localhost:5000/api/foods/${id}`, {
+        const res = await fetch(`https://jirani-eats-6.onrender.com/api/foods/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch food");
@@ -52,7 +52,7 @@ const RequestFood = () => {
 
     try {
       setRequesting(true);
-      const res = await fetch(`http://localhost:5000/api/requests`, {
+      const res = await fetch(`https://jirani-eats-6.onrender.com/api/requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -32,7 +32,7 @@ const AddFood = () => {
 
   const [socket, setSocket] = useState(null);
   useEffect(() => {
-    const s = io("http://localhost:5000", { auth: { token } });
+    const s = io("https://jirani-eats-6.onrender.com", { auth: { token } });
     setSocket(s);
     return () => s.disconnect();
   }, [token]);
@@ -45,7 +45,7 @@ const AddFood = () => {
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/foods", {
+      const res = await fetch("https://jirani-eats-6.onrender.com/api/foods", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...form, pickupLocation: { address: form.address } }),

@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
   // SIGNUP FUNCTION
   const signup = async (formData) => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
+      const res = await fetch("https://jirani-eats-6.onrender.com/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
   // LOGIN FUNCTION
   const login = async ({ email, password }) => {
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch("https://jirani-eats-6.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

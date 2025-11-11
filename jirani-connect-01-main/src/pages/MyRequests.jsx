@@ -16,7 +16,7 @@ const MyRequests = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/requests", {
+        const res = await fetch("https://jirani-eats-6.onrender.com/api/requests", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -41,7 +41,7 @@ const MyRequests = () => {
     if (!window.confirm("Are you sure you want to cancel this request?")) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}`, {
+      const res = await fetch(`https://jirani-eats-6.onrender.com/api/requests/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

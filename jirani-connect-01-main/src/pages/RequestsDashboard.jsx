@@ -15,7 +15,7 @@ const MyRequests = () => {
     const fetchRequests = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:5000/api/requests`, {
+        const res = await fetch(`https://jirani-eats-6.onrender.com/api/requests`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Failed to fetch requests");

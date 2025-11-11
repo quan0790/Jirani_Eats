@@ -32,7 +32,7 @@ const DonateFood = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/foods", {
+      const res = await fetch("https://jirani-eats-6.onrender.com/api/foods", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

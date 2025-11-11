@@ -22,8 +22,8 @@ const BrowseDonations = () => {
     try {
       setLoading(true);
       const [foodsRes, reqRes] = await Promise.all([
-        fetch("http://localhost:5000/api/foods"),
-        token ? fetch("http://localhost:5000/api/requests", { headers: { Authorization: `Bearer ${token}` } }) : Promise.resolve({ ok: false }),
+        fetch("https://jirani-eats-6.onrender.com/api/foods"),
+        token ? fetch("https://jirani-eats-6.onrender.com/api/requests", { headers: { Authorization: `Bearer ${token}` } }) : Promise.resolve({ ok: false }),
       ]);
 
       const foodData = await foodsRes.json();
@@ -43,7 +43,7 @@ const BrowseDonations = () => {
     if (user?.role !== "user") navigate("/dashboard"); // Only receivers can request
 
     fetchData();
-    const socket = io("http://localhost:5000", { auth: { token } });
+    const socket = io("https://jirani-eats-6.onrender.com", { auth: { token } });
 
     socket.on("foodAdded", (food) => setFoods((prev) => [food, ...prev]));
     socket.on("requestAdded", (request) => setRequests((prev) => [request, ...prev]));

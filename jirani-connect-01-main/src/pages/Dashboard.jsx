@@ -30,14 +30,14 @@ const Dashboard = () => {
       setLoading(true);
 
       // Fetch foods
-      const foodRes = await fetch("http://localhost:5000/api/foods", {
+      const foodRes = await fetch("https://jirani-eats-6.onrender.com/api/foods", {
         headers: { Authorization: `Bearer ${token}` },
       });
       let foodData = await foodRes.json();
       if (!Array.isArray(foodData)) foodData = [];
 
       // Fetch requests
-      const requestRes = await fetch("http://localhost:5000/api/requests", {
+      const requestRes = await fetch("https://jirani-eats-6.onrender.com/api/requests", {
         headers: { Authorization: `Bearer ${token}` },
       });
       let requestData = await requestRes.json();
@@ -78,7 +78,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
 
-    const socket = io("http://localhost:5000", { auth: { token } });
+    const socket = io("https://jirani-eats-6.onrender.com", { auth: { token } });
 
     socket.on("foodAdded", (food) => {
       if (user?.role === "receiver") {
@@ -114,7 +114,7 @@ const Dashboard = () => {
 
   const handleUpdateRequest = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/requests/${id}`, {
+      const res = await fetch(`https://jirani-eats-6.onrender.com/api/requests/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
