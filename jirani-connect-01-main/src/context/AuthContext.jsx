@@ -51,19 +51,16 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Invalid email or password");
-      }
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Invalid email or password");
+
       setUser(data.user);
       setToken(data.token);
 
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token);
 
-      navigate("/dashboard");
+      return data.user; // <-- important for redirect in Auth.jsx
     } catch (error) {
       console.error("Login Error:", error);
       throw new Error(

@@ -18,7 +18,7 @@ const Auth = () => {
     name: "",
     email: "",
     password: "",
-    role: "receiver", // default role matches backend
+    role: "receiver", // default role
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,6 +27,7 @@ const Auth = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
     if (!loginData.email || !loginData.password) {
       setError("Please fill in all fields.");
       return;
@@ -34,13 +35,13 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const user = await login(loginData);
+      const user = await login(loginData); // login now returns user
 
       // Redirect based on role
       if (user.role === "donor") navigate("/add-food");
       else navigate("/dashboard/browse-donations");
     } catch (err) {
-      console.error(err);
+      // Show backend error neatly under the form
       setError(err.message);
     } finally {
       setLoading(false);
@@ -51,6 +52,7 @@ const Auth = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
+
     if (!signupData.name || !signupData.email || !signupData.password) {
       setError("Please fill in all fields.");
       return;
@@ -60,12 +62,11 @@ const Auth = () => {
     try {
       await signup(signupData);
 
-      // After signup, switch to login
+      // Switch to login after successful signup
       setMode("login");
       setSignupData({ name: "", email: "", password: "", role: "receiver" });
       setError("");
     } catch (err) {
-      console.error("Signup Error:", err);
       setError(err.message || "Server error during registration");
     } finally {
       setLoading(false);
@@ -184,7 +185,6 @@ const Auth = () => {
                         />
                       </div>
 
-                      {/* Role Selection */}
                       <div>
                         <Label>Role</Label>
                         <select
