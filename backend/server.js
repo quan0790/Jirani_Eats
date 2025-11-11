@@ -27,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ CORS Configuration
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
   "https://jirani-eats-five.vercel.app",
 ];
 
@@ -46,13 +47,13 @@ app.use(
   })
 );
 
-// ✅ Explicitly handle preflight OPTIONS requests for all routes
+// ✅ Handle preflight OPTIONS requests globally
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
     res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
-    return res.sendStatus(200);
+    return res.sendStatus(200); // important: respond 200 to preflight
   }
   next();
 });
@@ -81,7 +82,7 @@ const PORT = process.env.PORT || 5000;
 // ✅ HTTP server for Socket.IO
 const server = http.createServer(app);
 
-// ✅ Socket.IO setup with CORS
+// ✅ Socket.IO setup with same CORS config
 export const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
