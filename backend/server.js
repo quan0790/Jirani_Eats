@@ -24,11 +24,15 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ CORS Configuration
+// ✅ Health check endpoint
+app.get("/healthz", (req, res) => res.status(200).json({ status: "OK" }));
+
+// ✅ CORS Configuration (include all allowed origins)
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://jirani-eats-five.vercel.app",
+  "https://jirani-eats-five.vercel.app", // old Vercel frontend
+  "https://jirani-eats-k55o4xzp7-mern-869038f4.vercel.app" // your new Vercel frontend
 ];
 
 app.use(
@@ -47,19 +51,8 @@ app.use(
   })
 );
 
-// ✅ Handle preflight OPTIONS requests globally
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
-    return res.sendStatus(200); // important: respond 200 to preflight
-  }
-  next();
-});
-
-// ✅ Health check endpoint
-app.get("/healthz", (req, res) => res.status(200).json({ status: "OK" }));
+// ✅ Allow preflight requests
+app.options("*", cors());
 
 // ✅ Root route
 app.get("/", (req, res) => {
@@ -79,7 +72,7 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ HTTP server for Socket.IO
+// ✅ Create HTTP server for Socket.IO
 const server = http.createServer(app);
 
 // ✅ Socket.IO setup with same CORS config
@@ -100,7 +93,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ Start server with port fallback
+// ✅ Start server with automatic port recovery
 const startServer = (port) => {
   server.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`);
