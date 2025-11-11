@@ -27,11 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Health check endpoint
 app.get("/healthz", (req, res) => res.status(200).json({ status: "OK" }));
 
-// ✅ CORS Configuration (Fixed)
+// ✅ CORS Configuration
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:5174",
-  "https://jirani-eats-five.vercel.app", // ✅ Your deployed frontend
+  "https://jirani-eats-five.vercel.app", // deployed frontend
 ];
 
 app.use(
@@ -71,10 +70,10 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ Create HTTP server for Socket.IO
+// ✅ HTTP server for Socket.IO
 const server = http.createServer(app);
 
-// ✅ Socket.IO setup with same CORS config
+// ✅ Socket.IO setup with CORS
 export const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -92,7 +91,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// ✅ Start server with automatic port recovery
+// ✅ Start server with port fallback
 const startServer = (port) => {
   server.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`);
